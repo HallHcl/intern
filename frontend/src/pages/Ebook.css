@@ -1,0 +1,127 @@
+.ebook-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f1ea; /* สีพื้นหลังสบายตา */
+  position: relative;
+  z-index: 10;
+  padding: 20px;
+  box-sizing: border-box; /* เพื่อให้ padding ไม่เพิ่มขนาดของ element */
+  min-height: 100%; /* ทำให้แน่ใจว่า container ครอบคลุมเต็มหน้าจอ */
+  padding-bottom: 90px;
+}
+
+.flipbook {
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3); /* เพิ่มเงาให้สมุดดูนูนขึ้น */
+  border-radius: 10px;
+  background: #fdfdfd; /* ทำให้ดูเหมือนหน้ากระดาษ */
+  width: 100%; /* ใช้ความกว้างเต็มที่ */
+  max-width: 450px; /* กำหนดขนาดสูงสุดให้เป็น 450px */
+  height: 600px;
+  overflow: hidden;
+}
+
+.page {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, #ffffff, #f9f9f9); /* ไล่สีให้เหมือนกระดาษ */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  text-align: center;
+  border-radius: 5px;
+  box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.1); /* เงาด้านในเหมือนหน้ากระดาษ */
+}
+
+.page h2 {
+  font-size: 22px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.page p {
+  font-size: 16px;
+  color: #555;
+  max-width: 80%;
+  line-height: 1.6;
+  margin: 0 auto;
+}
+
+
+/* เอฟเฟกต์เมื่อเปิดหนังสือ */
+.flipbook .page {
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.flipbook .page.flipping {
+  transform: rotateY(180deg);  /* ทำให้หน้าดูเหมือนหมุน */
+}
+
+.flipbook .page:hover {
+  transform: scale(1.02);
+}
+
+.download-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #ff007e;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.download-btn:hover {
+  background: #ff5ead;
+}
+
+.sidebar {
+  width: 250px; /* กำหนดความกว้างของสารบัญ */
+  padding: 20px; /* เพิ่ม padding เพื่อให้มีพื้นที่หายใจ */
+  background-color: #fdfdfd; /* สีพื้นหลังของสารบัญ */
+  border-right: 1px solid #ccc; /* ขอบด้านขวาของสารบัญ */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* เพิ่มเงาให้กับสารบัญ */
+  height: 100%;
+  color: #333; /* สีตัวอักษรให้เข้มขึ้น */
+}
+
+
+.sidebar h2 {
+  color: #b30000; /* สีหัวข้อของสารบัญ */
+}
+
+.sidebar button {
+  color: #333; /* สีข้อความในปุ่ม */
+  background: none; /* ไม่มีพื้นหลัง */
+  border: none; /* ไม่มีขอบ */
+  text-align: left; /* จัดข้อความไปทางซ้าย */
+  cursor: pointer; /* เปลี่ยนเคอร์เซอร์เมื่อชี้ที่ปุ่ม */
+  padding: 5px 0; /* เพิ่ม padding สำหรับปุ่ม */
+  width: 100%; /* ทำให้ปุ่มกว้างเต็มสารบัญ */
+}
+
+.sidebar button:hover {
+  color: #0056b3; /* เปลี่ยนสีเมื่อชี้ปุ่ม */
+}
+
+.content {
+  flex-grow: 1; /* ให้เนื้อหาขยายเต็มพื้นที่ที่เหลือ */
+  padding: 20px; /* เพิ่ม padding สำหรับเนื้อหา */
+  margin-left: 200px;
+}
