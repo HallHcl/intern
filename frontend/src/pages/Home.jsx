@@ -93,7 +93,7 @@ const Home = () => {
                     <div className="image-banner" style={{ maxHeight: '270px' }}>
                       <div className="picture" style={{ width: '100%' }}>
                           <img
-                            alt="คู่มือการใช้เครื่องปริ้น"
+                            alt="คู่มือกกกกการใช้เครื่องปริ้น"
                             title="คู่มือการใช้เครื่องปริ้น"
                             src="https://iristechworld.com/wp-content/uploads/2023/02/epson-m3170-one-510x510-1.jpg"
                             style={{ width: '100%', height: '100%' }}
