@@ -101,16 +101,71 @@
   padding: 0;
 }
 
+.nav-links li {
+  position: relative;
+  padding-bottom: 10px; /* เพิ่มพื้นที่ให้เมาส์เคลื่อนที่ระหว่างปุ่มและ dropdown */
+}
+
+.dropdown {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
 /* Dropdown menu for Manuals */
 .nav-links li .dropdown {
   display: block;
   position: absolute;
-  background-color: #ff5ead;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  background-color: #ff007e;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
   min-width: 160px;
   z-index: 1000;
-  top: 40px;
+  top: 100%;
+  left: 0;
+  opacity: 1;
+  visibility: visible;
+  border-radius: 0 0 8px 8px;
+  overflow: hidden; /* สำหรับเอฟเฟกต์ขอบมน */
+  transition: all 0.3s ease; /* เพิ่มการเปลี่ยนแปลงแบบนุ่มนวล */
 }
+
+.nav-links li .dropdown li {
+  padding: 12px 20px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-links li .dropdown li:not(:last-child) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* เอฟเฟกต์เมื่อ hover ที่เมนูย่อย */
+.nav-links li .dropdown li:hover {
+  background-color: #e6006e;
+}
+
+/* เอฟเฟกต์ขยับข้อความเล็กน้อยเมื่อ hover */
+.nav-links li .dropdown li:hover a {
+  transform: translateX(5px);
+}
+
+
+.nav-links li .dropdown li:hover a::after {
+  width: 100%;
+}
+
+/* เอฟเฟกต์ไอคอนลูกศร (เลือกใช้ฟอนต์ไอคอนหรือ SVG) */
+.nav-links li .dropdown li a::before {
+  content: '→';
+  position: absolute;
+  left: -15px;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.nav-links li .dropdown li:hover a::before {
+  left: -10px;
+  opacity: 1;
+}
+
 
 .nav-links li .dropdown li {
   padding: 10px 20px;
@@ -122,7 +177,7 @@
 }
 
 .nav-links li .dropdown li a:hover {
-  background-color: #ff007e;
+  background-color: #e6006e;
 }
 
 /* Hamburger menu styles */

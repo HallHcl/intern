@@ -17,14 +17,15 @@ const News = () => {
   useEffect(() => {
     const getNews = async () => {
       try {
-        const articles = await fetchNews("finance");
+        const articles = await fetchNews('technology');
         setNews(articles);
       } catch (error) {
-        console.error("Error fetching news:", error);
+        console.error('Error fetching news:', error);
       }
     };
     getNews();
   }, []);
+  
 
   // ฟังก์ชันเปิด Modal และตั้งค่าข่าวที่ถูกเลือก
   const handleShowPreview = (article) => {
@@ -54,7 +55,7 @@ const News = () => {
                     onClick={() => handleShowPreview(article)} 
                     style={{ cursor: "pointer" }} // ให้ Card เป็นแบบคลิกได้
                   >
-                    <Card.Img variant="top" src={article.image || "https://via.placeholder.com/600x300"} />
+                    <Card.Img variant="top" src={article.urlToImage || "https://via.placeholder.com/600x300"} />
                     <Card.Body>
                       <Card.Title>{article.title}</Card.Title>
                       <Card.Text>
@@ -77,7 +78,7 @@ const News = () => {
                   onClick={() => handleShowPreview(article)} 
                   style={{ cursor: "pointer" }} // ให้ Card เป็นแบบคลิกได้
                 >
-                  <Card.Img variant="top" src={article.image || "https://via.placeholder.com/600x300"} />
+                  <Card.Img variant="top" src={article.urlToImage || "https://via.placeholder.com/600x300"} />
                   <Card.Body>
                     <Card.Title>{article.title}</Card.Title>
                     <Card.Text>
@@ -97,7 +98,7 @@ const News = () => {
           </Modal.Header>
           <Modal.Body>
             <img
-              src={selectedNews?.image || "https://via.placeholder.com/600x300"}
+              src={selectedNews?.urlToImage || "https://via.placeholder.com/600x300"}
               alt="news-preview"
               className="img-fluid mb-3"
             />

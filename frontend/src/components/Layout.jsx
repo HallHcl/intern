@@ -1,28 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import './Layout.css';
 
 const LayoutComponent = ({ children }) => {
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [isHovering, setIsHovering] = useState(false);
+  const navRef = useRef(null);
 
-  const toggleManualsDropdown = () => {
-    setActiveDropdown(activeDropdown === 'manuals' ? null : 'manuals');
+  const toggleDropdown = (type) => {
+    setActiveDropdown(activeDropdown === type ? null : type);
   };
 
-  const toggleVideosDropdown = () => {
-    setActiveDropdown(activeDropdown === 'videos' ? null : 'videos');
+  const handleMouseEnter = (type) => {
+    setIsHovering(true);
+    setActiveDropdown(type);
   };
 
-  const handleClickOutside = (event) => {
-    if (!event.target.closest('.manuals') && !event.target.closest('.videos')) {
-      setActiveDropdown(null);
-    }
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    // ใช้ setTimeout เพื่อให้มีเวลาคลิกก่อนที่ dropdown จะปิด
+    setTimeout(() => {
+      if (!isHovering) {
+        setActiveDropdown(null);
+      }
+    }, 300);
   };
 
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+  const handleDropdownMouseEnter = () => {
+    setIsHovering(true);
+  };
+
+  const handleDropdownMouseLeave = () => {
+    setIsHovering(false);
+    setActiveDropdown(null);
+  };
 
   return (
     <>
@@ -31,17 +42,17 @@ const LayoutComponent = ({ children }) => {
           <div className="header-main-content">
             <div className="header-col-left">
               <a href="tel:028578888">
-                <i className="icon-sl-phone"></i>📞 02-857-8888 (สำนักงานใหญ่)
+                <i className="icon-sl-phone"></i>📱 02-857-8888 (สำนักงานใหญ่)
               </a>
             </div>
             <div className="header-col-right">
-              <a href="https://careers.turbo.co.th/" rel="noopener noreferrer" target="_blank">ร่วมงานกับเรา</a>
-              <a href="/aboutus" target="_self">เกี่ยวกับเรา</a>
+            <a href="/login" class="login-btn" rel="noopener noreferrer" target="_blank">Login</a>
+            <a href="/aboutus" target="_self">เกี่ยวกับเรา</a>
             </div>
           </div>
         </div>
 
-        <div className="navbar">
+        <div className="navbar" ref={navRef}>
           <div className="logo">
             <img src="https://www.turbo.co.th/static/images/logo/logo-desktop.png" alt="Logo" />
           </div>
@@ -51,24 +62,40 @@ const LayoutComponent = ({ children }) => {
               <li><Link to="/">Home</Link></li>
               <li><Link to="/it-staff">IT Staff</Link></li>
               <li><Link to="/news">News</Link></li>
-              <li className="manuals">
-                <button onClick={toggleManualsDropdown} className="manuals-button">
-                  Manuals
+              <li 
+                className="manuals"
+                onMouseEnter={() => handleMouseEnter('manuals')}
+                onMouseLeave={handleMouseLeave}
+              >
+                <button onClick={() => toggleDropdown('manuals')} className="manuals-button">
+                  E-book
                 </button>
                 {activeDropdown === 'manuals' && (
-                  <ul className="dropdown">
+                  <ul 
+                    className="dropdown"
+                    onMouseEnter={handleDropdownMouseEnter}
+                    onMouseLeave={handleDropdownMouseLeave}
+                  >
                     <li><Link to="/notebook-ebook">Notebook</Link></li>
-                    <li><Link to="/printer-ebook">Printer</Link></li>
+                    <li><Link to="/printer">Printer</Link></li>
                     <li><Link to="/wifi-ebook">Wifi and VPN</Link></li>
                   </ul>
                 )}
               </li>
-              <li className="videos">
-                <button onClick={toggleVideosDropdown} className="videos-button">
+              <li 
+                className="videos"
+                onMouseEnter={() => handleMouseEnter('videos')}
+                onMouseLeave={handleMouseLeave}
+              >
+                <button onClick={() => toggleDropdown('videos')} className="videos-button">
                   Videos
                 </button>
                 {activeDropdown === 'videos' && (
-                  <ul className="dropdown">
+                  <ul 
+                    className="dropdown"
+                    onMouseEnter={handleDropdownMouseEnter}
+                    onMouseLeave={handleDropdownMouseLeave}
+                  >
                     <li><Link to="/notebook-video">Notebook</Link></li>
                     <li><Link to="/printer-video">Printer</Link></li>
                     <li><Link to="/wifi-video">Wifi and VPN</Link></li>
