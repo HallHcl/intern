@@ -58,12 +58,22 @@ body {
 .leader .staff-card {
   background: linear-gradient(135deg, #ffffff, #ffffff);
   color: white;
-  border: 2px solid #0044ff;
+  border: 2px solid #002c5f;
   width: 260px;
   position: relative;
   top: 20px; /* ใช้ top แทน margin-top เพื่อการควบคุมตำแหน่งที่แม่นยำ */
   
 }
+
+.super-leader .staff-card {
+  background: linear-gradient(135deg, #ffffff, #ffffff); /* Pink gradient */
+  color: white;
+  border: 2px solid #ff007f; /* Pink border */
+  width: 260px;
+  position: relative;
+  top: 20px; /* Use top instead of margin-top for precise positioning */
+}
+
 
 .modal-body img {
   width: 100%;

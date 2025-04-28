@@ -98,11 +98,15 @@ app.get('/api/it-staff', async (req, res) => {
 
 // POST endpoint for adding new IT staff
 app.post('/api/it-staff', async (req, res) => {
-  const { firstName, lastName, position, phone, email, profilePic } = req.body;
+  const { firstName, lastName, position, phone, email, profilePic, description } = req.body;
 
-  if (!firstName || !lastName || !position || !phone || !email) {
+  // ตรวจสอบว่าฟิลด์ที่จำเป็นทั้งหมดได้รับค่าแล้วหรือไม่
+  if (!firstName || !lastName || !position || !phone || !email || !description) {
     return res.status(400).json({ message: 'All fields are required' });
   }
+
+  // ตรวจสอบข้อมูลที่ได้รับจาก req.body
+  console.log(req.body);  // เพิ่มการ log ที่นี่เพื่อตรวจสอบข้อมูล
 
   try {
     const newStaff = new ITStaff({
@@ -111,7 +115,8 @@ app.post('/api/it-staff', async (req, res) => {
       position,
       phone,
       email,
-      profilePic
+      profilePic,
+      description  // เพิ่ม description ที่นี่
     });
 
     await newStaff.save();
@@ -120,6 +125,8 @@ app.post('/api/it-staff', async (req, res) => {
     res.status(500).json({ message: 'Error adding staff' });
   }
 });
+
+
 
 app.use('/api/auth', authRoutes);
 

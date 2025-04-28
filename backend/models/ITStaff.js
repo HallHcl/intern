@@ -7,7 +7,7 @@ const ITStaffSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   email: { type: String, required: true },
   profilePic: { type: String },  // เก็บ URL ของรูปภาพ
-  description: { String }, // <-- เพิ่มตรงนี้
+  description: { type: String }, // ✅ ต้องมี type: String
   managerId: { type: mongoose.Schema.Types.ObjectId, ref: 'ITStaff' }  // ฟิลด์สำหรับการเชื่อมโยงกับผู้จัดการ
 });
 

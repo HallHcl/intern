@@ -3,7 +3,8 @@ import Layout from '../components/Layout';
 import { Modal, Button } from 'react-bootstrap';  // Import Modal from react-bootstrap
 import './ITStaffTree.css';
 
-const LEADER_ID = '67d43cce815dcd81ec4d1713'; // Lock Leader by ID
+const SUPER_LEADER_ID = '680faff437678acdc2f9297c'; // Lock Super Leader by ID
+const LEADER_ID = '680fb01f37678acdc2f92980'; // Lock Leader by ID
 
 const ITStaffList = () => {
   const [staffData, setStaffData] = useState([]);
@@ -22,7 +23,8 @@ const ITStaffList = () => {
   }, []);
 
   const leader = staffData.find(person => person._id === LEADER_ID) || null;
-  const subordinates = staffData.filter(person => person._id !== LEADER_ID);
+  const superLeader = staffData.find(person => person._id === SUPER_LEADER_ID) || null;
+  const subordinates = staffData.filter(person => person._id !== LEADER_ID && person._id !== SUPER_LEADER_ID);
 
   const filteredSubordinates = subordinates.filter(person =>
     (person.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -34,6 +36,11 @@ const ITStaffList = () => {
     (leader.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       leader.lastName.toLowerCase().includes(searchTerm.toLowerCase())) &&
     (!filterPosition || leader.position === filterPosition);
+
+  const isSuperLeaderMatchingSearch = superLeader &&
+    (superLeader.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      superLeader.lastName.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (!filterPosition || superLeader.position === filterPosition);
 
   // Function to open modal and set selected staff
   const handleStaffClick = (person) => {
@@ -60,7 +67,21 @@ const ITStaffList = () => {
         </div>
 
         <div className="staff-tree">
-          {isLeaderMatchingSearch && (
+          {isSuperLeaderMatchingSearch && superLeader && (
+            <div className="super-leader">
+              <div className="staff-card super-leader-card" onClick={() => handleStaffClick(superLeader)}>
+                <img src={superLeader.profilePic} alt="Profile" className="profile-pic" />
+                <h3>{superLeader.firstName} {superLeader.lastName}</h3>
+                <div className="staff-info">
+                  <p><strong>Position:</strong> {superLeader.position}</p>
+                  <p><strong>📞</strong> {superLeader.phone}</p>
+                  <p><strong>✉️</strong> {superLeader.email}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {isLeaderMatchingSearch && leader && (
             <div className="leader">
               <div className="staff-card leader-card" onClick={() => handleStaffClick(leader)}>
                 <img src={leader.profilePic} alt="Profile" className="profile-pic" />
@@ -75,7 +96,7 @@ const ITStaffList = () => {
           )}
 
           <div className="subordinates">
-            {filteredSubordinates.length === 0 && !isLeaderMatchingSearch ? (
+            {filteredSubordinates.length === 0 && !isLeaderMatchingSearch && !isSuperLeaderMatchingSearch ? (
               <p className="no-results">❌ ไม่พบพนักงานที่ตรงกับเงื่อนไข</p>
             ) : (
               filteredSubordinates.map((person) => (
@@ -113,7 +134,6 @@ const ITStaffList = () => {
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowModal(false)}>ปิด</Button>
-            {/* You can add more buttons for further actions */}
           </Modal.Footer>
         </Modal>
       )}
@@ -122,3 +142,4 @@ const ITStaffList = () => {
 };
 
 export default ITStaffList;
+
