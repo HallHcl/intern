@@ -31,6 +31,16 @@ mongoose.connect('mongodb+srv://hallkong:741852963@cluster0.cez7m.mongodb.net/IT
 const API_KEY = "94853facc0e74c1d96a16e60ee0d5268";
 const BASE_URL = 'https://newsapi.org/v2/everything';
 
+app.get('/api/tickets/user/:userId', async (req, res) => {  // แก้เป็น /api/tickets/user/:userId
+  try {
+    const tickets = await Ticket.find({ userId: req.params.userId }).sort({ createdAt: -1 });
+    res.json(tickets);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch tickets' });
+  }
+});
+
+
 app.get('/api/tickets', async (req, res) => {
   try {
     const tickets = await Ticket.find();
@@ -42,22 +52,31 @@ app.get('/api/tickets', async (req, res) => {
 
 // POST endpoint to create a ticket
 app.post('/api/tickets', async (req, res) => {
-  const { branchCode, anydeskNumber, details, issueType } = req.body;
+  const { branchCode, anydeskNumber, details, issueType, userId } = req.body;
 
   // Validate required fields
-  if (!branchCode || !details || !issueType) {
+  if (!branchCode || !details || !issueType || !userId ) {
     return res.status(400).json({ message: 'กรุณากรอกข้อมูลให้ครบถ้วน' });
   }
 
-  // Create new ticket object
-  const newTicket = new Ticket({
-    branchCode,
-    anydeskNumber,
-    details,
-    issueType
-  });
-
   try {
+    // ตรวจสอบว่ามี userId จริงหรือไม่
+    const userExists = await User.findOne({ id: userId });
+    if (!userExists) {
+      return res.status(404).json({ message: 'ไม่พบผู้ใช้นี้ในระบบ' });
+    }
+
+    // Create new ticket object
+    const newTicket = new Ticket({
+      branchCode,
+      anydeskNumber,
+      details,
+      issueType,
+      userId,
+      status: 'WAIT FOR ASSET',
+      createdAt: new Date() // Explicitly setting createdAt if needed
+    });
+
     // Save ticket to database
     await newTicket.save();
     res.status(201).json({ message: 'Ticket created successfully' });
@@ -66,6 +85,35 @@ app.post('/api/tickets', async (req, res) => {
     res.status(500).json({ message: 'เกิดข้อผิดพลาดในการสร้าง ticket' });
   }
 });
+
+// PUT: Update ticket status by ticket _id only
+app.put('/api/tickets/:id/status', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ message: 'Status is required' });
+  }
+
+  try {
+    const updatedTicket = await Ticket.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true } // return updated document
+    );
+
+    if (!updatedTicket) {
+      return res.status(404).json({ message: 'Ticket not found' });
+    }
+
+    res.status(200).json({ message: 'Status updated', ticket: updatedTicket });
+  } catch (err) {
+    console.error('Error updating ticket status:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
 
 app.get('/api/news', async (req, res) => {
   try {
@@ -98,15 +146,11 @@ app.get('/api/it-staff', async (req, res) => {
 
 // POST endpoint for adding new IT staff
 app.post('/api/it-staff', async (req, res) => {
-  const { firstName, lastName, position, phone, email, profilePic, description } = req.body;
+  const { firstName, lastName, position, phone, email, profilePic } = req.body;
 
-  // ตรวจสอบว่าฟิลด์ที่จำเป็นทั้งหมดได้รับค่าแล้วหรือไม่
-  if (!firstName || !lastName || !position || !phone || !email || !description) {
+  if (!firstName || !lastName || !position || !phone || !email) {
     return res.status(400).json({ message: 'All fields are required' });
   }
-
-  // ตรวจสอบข้อมูลที่ได้รับจาก req.body
-  console.log(req.body);  // เพิ่มการ log ที่นี่เพื่อตรวจสอบข้อมูล
 
   try {
     const newStaff = new ITStaff({
@@ -115,8 +159,7 @@ app.post('/api/it-staff', async (req, res) => {
       position,
       phone,
       email,
-      profilePic,
-      description  // เพิ่ม description ที่นี่
+      profilePic
     });
 
     await newStaff.save();
@@ -125,8 +168,6 @@ app.post('/api/it-staff', async (req, res) => {
     res.status(500).json({ message: 'Error adding staff' });
   }
 });
-
-
 
 app.use('/api/auth', authRoutes);
 
