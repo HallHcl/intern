@@ -31,6 +31,55 @@ mongoose.connect('mongodb+srv://hallkong:741852963@cluster0.cez7m.mongodb.net/IT
 const API_KEY = "94853facc0e74c1d96a16e60ee0d5268";
 const BASE_URL = 'https://newsapi.org/v2/everything';
 
+
+// GET: Report tickets by date range
+app.get('/api/tickets/report', async (req, res) => {
+  const { start, end } = req.query;
+
+  if (!start || !end) {
+    return res.status(400).json({ message: 'กรุณาระบุวันที่เริ่มต้นและสิ้นสุด' });
+  }
+
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  endDate.setHours(23, 59, 59, 999);
+
+  try {
+    const allTickets = await Ticket.find({
+      createdAt: { $gte: startDate, $lte: endDate }
+    });
+
+    // เตรียม object เพื่อรวมจำนวนแต่ละ status
+    const statusSummary = {
+      'WAIT FOR ASSET': 0,
+      'WORK IN PROGRESS': 0,
+      'CHECKING': 0,
+      'PENDING': 0,
+      'COMPLETED': 0
+    };
+
+    // นับแต่ละสถานะ
+    allTickets.forEach(ticket => {
+      if (statusSummary[ticket.status] !== undefined) {
+        statusSummary[ticket.status]++;
+      }
+    });
+
+    const total = allTickets.length;
+
+    res.status(200).json({
+      totalTickets: total,
+      statusSummary,
+      tickets: allTickets
+    });
+  } catch (err) {
+    console.error('Error generating report:', err);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในการสร้างรายงาน' });
+  }
+});
+
+
+
 app.get('/api/tickets/user/:userId', async (req, res) => {  // แก้เป็น /api/tickets/user/:userId
   try {
     const tickets = await Ticket.find({ userId: req.params.userId }).sort({ createdAt: -1 });

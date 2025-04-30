@@ -118,105 +118,42 @@ const ITStaffList = () => {
       {/* Modal for staff preview */}
 {selectedStaff && (
   <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
-    <Modal.Body className="p-0">
+    <Modal.Header closeButton>
+      <Modal.Title>ข้อมูลพนักงาน</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
       <div className="d-flex flex-row">
-        {/* Left Side - Image */}
-        <div style={{
-          backgroundColor: '#ff40a1', // ใช้สีหลัก
-          width: '40%', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          borderTopLeftRadius: '8px', 
-          borderBottomLeftRadius: '8px'
-        }}>
+        {/* Left side: image and name */}
+        <div className="text-center w-50 border-end pe-3">
           <img
             src={selectedStaff.profilePic || "https://via.placeholder.com/150"}
             alt="Profile Preview"
-            style={{
-              width: '80%', 
-              height: 'auto', 
-              borderRadius: '8px', 
-              boxShadow: '0 4px 8px rgba(0,0,0,0.1)', 
-              border: '5px solid #ff40a1'
-            }}
+            className="img-fluid rounded-circle mb-3"
+            style={{ width: "200px", height: "200px", objectFit: "cover" }}
           />
+          <h5 className="mt-2 text-capitalize">
+            {selectedStaff.firstName} {selectedStaff.lastName}
+          </h5>
         </div>
 
-        {/* Right Side - Information */}
-        <div style={{
-          backgroundColor: '#ff40a1', // ใช้สีหลัก
-          color: 'white', 
-          width: '60%', 
-          padding: '20px', 
-          fontFamily: 'Roboto, sans-serif', 
-          borderTopRightRadius: '8px', 
-          borderBottomRightRadius: '8px', 
-          boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-        }}>
-          <h2 style={{
-            textAlign: 'center', 
-            fontSize: '36px', 
-            marginBottom: '20px', 
-            color: 'white', 
-            fontWeight: 'bold'
-          }}>
-            {selectedStaff.firstName} {selectedStaff.lastName}
-          </h2>
-          <div className="d-flex justify-content-between mb-3">
-            <div style={{
-              backgroundColor: 'rgba(255, 64, 161, 0.8)', // ใช้ rgba สำหรับโปร่งใส
-              color: 'white', // ข้อความเป็นสีขาว
-              padding: '8px 15px', 
-              fontWeight: 'bold', 
-              borderRadius: '5px'
-            }}>
-              {selectedStaff.position}
-            </div>
-            <div style={{
-              backgroundColor: 'rgba(255, 64, 161, 0.8)', 
-              color: 'white', 
-              padding: '8px 15px', 
-              fontWeight: 'bold', 
-              borderRadius: '5px'
-            }}>
-              {selectedStaff.phone}
-            </div>
-          </div>
-          <div className="mb-3" style={{
-            backgroundColor: 'rgba(255, 64, 161, 0.8)', 
-            color: 'white', 
-            padding: '8px 15px', 
-            fontWeight: 'bold', 
-            borderRadius: '5px'
-          }}>
-            {selectedStaff.email}
-          </div>
-          <div style={{
-            backgroundColor: 'rgba(255, 64, 161, 0.8)', // ใช้ rgba สำหรับโปร่งใส
-            color: 'white', 
-            padding: '15px', 
-            fontSize: '18px', 
-            fontWeight: 'bold', 
-            borderRadius: '5px', 
-            marginTop: '20px'
-          }}>
-            {selectedStaff.description || "ไม่มีข้อมูลเพิ่มเติม"}
-          </div>
+        {/* Right side: details */}
+        <div className="ps-4 w-50">
+          <p><strong>Positoin:</strong> {selectedStaff.position}</p>
+          <p><strong>✉️ Email:</strong> {selectedStaff.email}</p>
+          <p><strong>📞 Phone:</strong> {selectedStaff.phone}</p>
+          <p><strong>📝 Description:</strong> {selectedStaff.description || "ไม่มีข้อมูลเพิ่มเติม"}</p>
         </div>
       </div>
     </Modal.Body>
     <Modal.Footer>
-      <Button variant="secondary" onClick={() => setShowModal(false)} style={{
-        backgroundColor: '#ff40a1', 
-        borderColor: '#ff40a1', 
-        fontWeight: 'bold'
-      }}>
-        ปิด
-      </Button>
+      <Button variant="secondary" onClick={() => setShowModal(false)}>ปิด</Button>
     </Modal.Footer>
   </Modal>
 )}
+
+
+
+
     </Layout>
   );
 };
