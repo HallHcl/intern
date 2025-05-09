@@ -20,12 +20,16 @@ const ticketSchema = new mongoose.Schema({
   status: {
     type: String,
     default: 'WAIT FOR ASSET', // ค่า default
-    enum: ['WAIT FOR ASSET', 'WORK IN PROGRESS', 'CHECKING', 'PENDING', 'COMPLETED'] // ตัวเลือกสถานะ
+    enum: ['WAIT FOR ASSET', 'WORK IN PROGRESS', 'CHECKING', 'PENDING', 'CANCELLED','COMPLETED'] // ตัวเลือกสถานะ
   },
   userId: {
     type: Number,  // เปลี่ยนเป็น Number
     required: true,
   },
+  attachment: {
+    type: String,
+    required: false
+  },  
   createdAt: {
     type: Date,
     default: Date.now,

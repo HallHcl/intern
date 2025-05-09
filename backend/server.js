@@ -16,6 +16,25 @@ dotenv.config();
 // Middleware
 app.use(express.json());
 app.use(cors());
+const multer = require('multer');
+const path = require('path');
+
+// ตั้งค่า storage สำหรับ multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // เก็บไฟล์ไว้ในโฟลเดอร์นี้
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname)); // ใช้ชื่อไฟล์แบบ unique
+  }
+});
+
+const upload = multer({ storage });
+
+// ให้ express เสิร์ฟไฟล์จาก /uploads เป็น static path
+app.use('/uploads', express.static('uploads'));
+
 
 
 // MongoDB connection (ลบ options ที่เลิกใช้)
@@ -32,43 +51,29 @@ const API_KEY = "94853facc0e74c1d96a16e60ee0d5268";
 const BASE_URL = 'https://newsapi.org/v2/everything';
 
 
-// GET: Report tickets by date range
+// GET: Report tickets (all tickets, no date filter)
 app.get('/api/tickets/report', async (req, res) => {
-  const { start, end } = req.query;
-
-  if (!start || !end) {
-    return res.status(400).json({ message: 'กรุณาระบุวันที่เริ่มต้นและสิ้นสุด' });
-  }
-
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  endDate.setHours(23, 59, 59, 999);
-
   try {
-    const allTickets = await Ticket.find({
-      createdAt: { $gte: startDate, $lte: endDate }
-    });
+    const allTickets = await Ticket.find(); // ไม่มีเงื่อนไข filter
 
-    // เตรียม object เพื่อรวมจำนวนแต่ละ status
     const statusSummary = {
       'WAIT FOR ASSET': 0,
       'WORK IN PROGRESS': 0,
       'CHECKING': 0,
       'PENDING': 0,
-      'COMPLETED': 0
+      'COMPLETED': 0,
+      'CANCELLED': 0 // ✅ เพิ่มสถานะนี้
     };
+    
 
-    // นับแต่ละสถานะ
     allTickets.forEach(ticket => {
       if (statusSummary[ticket.status] !== undefined) {
         statusSummary[ticket.status]++;
       }
     });
 
-    const total = allTickets.length;
-
     res.status(200).json({
-      totalTickets: total,
+      totalTickets: allTickets.length,
       statusSummary,
       tickets: allTickets
     });
@@ -77,7 +82,6 @@ app.get('/api/tickets/report', async (req, res) => {
     res.status(500).json({ message: 'เกิดข้อผิดพลาดในการสร้างรายงาน' });
   }
 });
-
 
 
 app.get('/api/tickets/user/:userId', async (req, res) => {  // แก้เป็น /api/tickets/user/:userId
@@ -100,22 +104,19 @@ app.get('/api/tickets', async (req, res) => {
 });
 
 // POST endpoint to create a ticket
-app.post('/api/tickets', async (req, res) => {
+app.post('/api/tickets', upload.single('attachment'), async (req, res) => {
   const { branchCode, anydeskNumber, details, issueType, userId } = req.body;
 
-  // Validate required fields
   if (!branchCode || !details || !issueType || !userId ) {
     return res.status(400).json({ message: 'กรุณากรอกข้อมูลให้ครบถ้วน' });
   }
 
   try {
-    // ตรวจสอบว่ามี userId จริงหรือไม่
     const userExists = await User.findOne({ id: userId });
     if (!userExists) {
       return res.status(404).json({ message: 'ไม่พบผู้ใช้นี้ในระบบ' });
     }
 
-    // Create new ticket object
     const newTicket = new Ticket({
       branchCode,
       anydeskNumber,
@@ -123,15 +124,51 @@ app.post('/api/tickets', async (req, res) => {
       issueType,
       userId,
       status: 'WAIT FOR ASSET',
-      createdAt: new Date() // Explicitly setting createdAt if needed
+      attachment: req.file ? `/uploads/${req.file.filename}` : null,
+      createdAt: new Date()
     });
 
-    // Save ticket to database
     await newTicket.save();
-    res.status(201).json({ message: 'Ticket created successfully' });
+    res.status(201).json({ message: '', ticket: newTicket });
   } catch (err) {
     console.error('Error creating ticket:', err);
     res.status(500).json({ message: 'เกิดข้อผิดพลาดในการสร้าง ticket' });
+  }
+});
+
+// PUT: Admin cancels a ticket by ticket _id
+app.put('/api/tickets/:id/cancel', async (req, res) => {
+  const ticketId = req.params.id;
+  try {
+    const ticket = await Ticket.findById(ticketId);
+
+    // ตรวจสอบว่า ticket นี้มีอยู่หรือไม่
+    if (!ticket) {
+      return res.status(404).json({ message: 'Ticket not found' });
+    }
+
+    // เปลี่ยนสถานะของ ticket เป็น CANCELLED
+    ticket.status = 'CANCELLED';
+    await ticket.save();
+
+    // ส่งข้อมูลที่ถูกแก้ไขกลับ
+    res.status(200).json({ message: 'Ticket cancelled successfully', ticket });
+  } catch (err) {
+    console.error('Error canceling ticket:', err);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในการยกเลิก ticket' });
+  }
+});
+
+app.delete('/api/tickets/:id', async (req, res) => {
+  try {
+    const ticket = await Ticket.findByIdAndDelete(req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ message: 'Ticket not found' });
+    }
+
+    res.status(200).json({ message: 'Ticket deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting ticket', error: err.message });
   }
 });
 
@@ -162,6 +199,16 @@ app.put('/api/tickets/:id/status', async (req, res) => {
   }
 });
 
+// GET: Get all users
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้' });
+  }
+});
 
 
 app.get('/api/news', async (req, res) => {
@@ -194,8 +241,9 @@ app.get('/api/it-staff', async (req, res) => {
 });
 
 // POST endpoint for adding new IT staff
-app.post('/api/it-staff', async (req, res) => {
-  const { firstName, lastName, position, phone, email, profilePic } = req.body;
+app.post('/api/it-staff', upload.single('profilePic'), async (req, res) => {
+  const { firstName, lastName, position, phone, email, description } = req.body;
+  const profilePic = req.file ? `/uploads/${req.file.filename}` : null;
 
   if (!firstName || !lastName || !position || !phone || !email) {
     return res.status(400).json({ message: 'All fields are required' });
@@ -208,15 +256,74 @@ app.post('/api/it-staff', async (req, res) => {
       position,
       phone,
       email,
-      profilePic
-    });
+      profilePic,    
+      description,
 
+    });
+    
     await newStaff.save();
     res.status(201).json({ message: 'IT staff added successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Error adding staff' });
   }
 });
+
+// PUT: Update IT staff by ID
+app.put('/api/it-staff/:id', upload.single('profilePic'), async (req, res) => {
+  const { id } = req.params;
+  const { firstName, lastName, position, phone, email, description, managerId } = req.body;
+  const profilePic = req.file ? `/uploads/${req.file.filename}` : null;
+
+  if (!firstName || !lastName || !position || !phone || !email) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
+  try {
+    // ค้นหา IT staff ตาม ID
+    const staff = await ITStaff.findById(id);
+    if (!staff) {
+      return res.status(404).json({ message: 'Staff not found' });
+    }
+
+    // อัปเดตข้อมูล IT staff
+    staff.firstName = firstName;
+    staff.lastName = lastName;
+    staff.position = position;
+    staff.phone = phone;
+    staff.email = email;
+    staff.description = description;
+    staff.managerId = managerId;
+    staff.profilePic = profilePic || staff.profilePic; // ใช้ profilePic เก่าถ้าไม่มีใหม่
+
+    // บันทึกการเปลี่ยนแปลง
+    await staff.save();
+
+    res.status(200).json({ message: 'Staff updated successfully', staff });
+  } catch (err) {
+    console.error('Error updating staff:', err);
+    res.status(500).json({ message: 'Error updating staff' });
+  }
+});
+
+// DELETE: Delete IT staff by ID
+app.delete('/api/it-staff/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // ค้นหาและลบ IT staff ตาม ID
+    const staff = await ITStaff.findByIdAndDelete(id);
+    if (!staff) {
+      return res.status(404).json({ message: 'Staff not found' });
+    }
+
+    res.status(200).json({ message: 'Staff deleted successfully' });
+  } catch (err) {
+    console.error('Error deleting staff:', err);
+    res.status(500).json({ message: 'Error deleting staff' });
+  }
+});
+
+
 
 app.use('/api/auth', authRoutes);
 
