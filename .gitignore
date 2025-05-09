@@ -1,0 +1,16 @@
+*.md
+*.js
+*.json
+*.npmignore
+*.jshintrc
+*.markdown
+*.yaml
+*.ts
+*.ps1
+*.cmd
+*.proto
+*.map
+*.bnf
+*.mjs
+*.mp4
+*.nycrc
